@@ -7,6 +7,6 @@ diskon untuk memprediksi kondisi penjualan produk.
 ## **Kelompok SeDuTi**
 #### Ketua Kelompok: Faiz Gymnastiar Wibawa - 24/537851/TK/59634
 #### Anggota 1:  
-#### Anggota 2:  
+#### Anggota 2:  Javier Yazid Janadi - 24/545752/TK/60737
 
 ###### @Senior Project TIF UGM 2026
