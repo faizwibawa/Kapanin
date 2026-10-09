@@ -54,7 +54,7 @@ Implementation language: **TypeScript** (as specified in the design). The design
     - Valid / missing / malformed / expired / no-`sub`, using locally-signed test keys and a stubbed JWKS; valid token populates `req.user` from `sub`
     - _Requirements: 2.1, 2.5, 2.6, 9.2_
 
-- [ ] 5. Enable RLS, owner-scoped policies, and the profile auto-creation trigger
+- [x] 5. Enable RLS, owner-scoped policies, and the profile auto-creation trigger
   - Add an RLS migration enabling RLS on every data table (`products`, `stock`, `sales`, `discounts`)
   - Add the four-policy pattern (select/insert/update/delete) per table with `owner_id = auth.uid()` (`with check` on insert/update)
   - Add the `handle_new_user` function (security definer, empty `search_path`) and the `on_auth_user_created` trigger that inserts a `profiles` row on `auth.users` insert
@@ -66,7 +66,7 @@ Implementation language: **TypeScript** (as specified in the design). The design
     - Insert into `auth.users` (via test harness) and assert a 1:1 `profiles` row with matching `id`
     - _Requirements: 4.1, 4.2_
 
-- [ ] 6. Implement the Products CRUD vertical slice end to end (reusable template)
+- [x] 6. Implement the Products CRUD vertical slice end to end (reusable template)
   - Implement `src/types` product DTOs, `zod` schemas, `src/services/products.ts` (`list`/`getById`/`create`/`update`/`remove`, all owner-scoped), and `src/routes/products.ts`
   - Wire route -> service -> Supabase with the auth middleware; stamp `owner_id` from `req.user.id` on create
   - Implement `src/middleware/error.ts` (`AppError`, `errorHandler`): `201` on create, `404` on absent/not-owned, `400` on validation, map auth/forbidden/not-found/unknown consistently without leaking internals
@@ -82,7 +82,7 @@ Implementation language: **TypeScript** (as specified in the design). The design
     - Each endpoint incl. `zod` validation failures (`400` with field detail), not-found (`404`), and list returning only owned products
     - _Requirements: 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 7. Implement the Stock, Sales, and Discounts slices following the Products template
+- [x] 7. Implement the Stock, Sales, and Discounts slices following the Products template
   - Add types, `zod` schemas, services, and routers for `stock`, `sales`, `discounts`, reusing the owner-scoped CRUD template from Task 6
   - Enforce composite-FK same-owner integrity: a cross-owner `product_id` is rejected with `4xx` and writes nothing
   - Provide listing/filtering useful to later AI consumption (e.g., by product/date)
@@ -98,7 +98,7 @@ Implementation language: **TypeScript** (as specified in the design). The design
     - Owner scoping, validation failures, and the shared CRUD pattern applied to each resource
     - _Requirements: 6.2, 7.6_
 
-- [ ] 8. Wire everything together and document setup
+- [x] 8. Wire everything together and document setup
   - Mount all routers (`health`, `me`, `products`, `stock`, `sales`, `discounts`) in `app.ts`; finalize CORS (configured origins) and the centralized error handler ordering
   - Write `backend/README.md`: env setup, running migrations, and the Supabase-centric auth flow (signup -> JWT -> Bearer request)
   - Confirm a clean `build` and that the full test suite passes

@@ -3,6 +3,22 @@
     "2.1 Write the config-loader fail-fast test matrix": {
       "status": "passed",
       "lastRunTimestamp": 1791541387548
+    },
+    "6.1 Write the create/read round-trip property test": {
+      "status": "passed",
+      "lastRunTimestamp": 1791560910476
+    },
+    "6.2 Write the owner-stamping property test": {
+      "status": "passed",
+      "lastRunTimestamp": 1791560911570
+    },
+    "7.1 Write the FK-owner-integrity property test": {
+      "status": "passed",
+      "lastRunTimestamp": 1791561881414
+    },
+    "7.2 Write the constraint-honouring property test across resources": {
+      "status": "passed",
+      "lastRunTimestamp": 1791561882390
     }
   },
   "executionHistory": {
@@ -59,6 +75,54 @@
         "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
         "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
         "timestamp": 1791543206857
+      }
+    ],
+    "5. Enable RLS, owner-scoped policies, and the profile auto-creation trigger": [
+      {
+        "executionId": "755e8095-3104-4ec6-90df-fc83904ed61b",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791546417377
+      },
+      {
+        "executionId": "755e8095-3104-4ec6-90df-fc83904ed61b",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791559151557
+      }
+    ],
+    "6. Implement the Products CRUD vertical slice end to end (reusable template)": [
+      {
+        "executionId": "eb54f2dd-51e7-4ffc-980c-13a616dba740",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791559736239
+      },
+      {
+        "executionId": "eb54f2dd-51e7-4ffc-980c-13a616dba740",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791561052415
+      }
+    ],
+    "7. Implement the Stock, Sales, and Discounts slices following the Products template": [
+      {
+        "executionId": "eb54f2dd-51e7-4ffc-980c-13a616dba740",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791561057033
+      },
+      {
+        "executionId": "eb54f2dd-51e7-4ffc-980c-13a616dba740",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791562034010
+      }
+    ],
+    "8. Wire everything together and document setup": [
+      {
+        "executionId": "eb54f2dd-51e7-4ffc-980c-13a616dba740",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791562038832
+      },
+      {
+        "executionId": "eb54f2dd-51e7-4ffc-980c-13a616dba740",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791563181558
       }
     ]
   }

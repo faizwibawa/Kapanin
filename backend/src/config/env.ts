@@ -23,6 +23,17 @@ export interface AppConfig {
   readonly supabaseUrl: string;
   readonly supabaseSecretKey: string;
   readonly supabaseJwksUrl: string;
+  /**
+   * Optional Supabase anon/publishable key. The backend itself never needs it
+   * (it talks to Postgres with the privileged secret key), but the live
+   * integration tests (sub-tasks 8.1/8.2) use it to build a *user-facing*
+   * client and call `signInWithPassword`, obtaining a REAL user JWT so the
+   * full Supabase-centric auth flow can be exercised end to end. It is strictly
+   * optional: when absent, those live tests skip gracefully and nothing else is
+   * affected. Not a secret in the service-role sense, but still read only from
+   * the git-ignored `.env`.
+   */
+  readonly supabaseAnonKey?: string;
   readonly nodeEnv: NodeEnv;
   readonly corsOrigins: readonly string[];
 }
@@ -132,11 +143,18 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
     supabaseJwksUrl = `${base}/.well-known/jwks.json`;
   }
 
+  // Optional anon/publishable key: present-but-blank is treated as absent. No
+  // throw when missing — it only enables the live integration tests.
+  const anonRaw = env.SUPABASE_ANON_KEY ?? env.SUPABASE_PUBLISHABLE_KEY;
+  const supabaseAnonKey =
+    anonRaw !== undefined && anonRaw.trim() !== '' ? anonRaw.trim() : undefined;
+
   const config: AppConfig = {
     port: parsePort(env),
     supabaseUrl: supabaseUrl.toString().replace(/\/+$/, ''),
     supabaseSecretKey,
     supabaseJwksUrl,
+    supabaseAnonKey,
     nodeEnv: parseNodeEnv(env),
     corsOrigins: Object.freeze([...parseCorsOrigins(env)]),
   };
