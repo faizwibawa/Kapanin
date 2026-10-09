@@ -1,0 +1,65 @@
+{
+  "pbtResults": {
+    "2.1 Write the config-loader fail-fast test matrix": {
+      "status": "passed",
+      "lastRunTimestamp": 1791541387548
+    }
+  },
+  "executionHistory": {
+    "9. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791539768203
+      }
+    ],
+    "1. Scaffold the backend service with a health endpoint": [
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791539807402
+      },
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791541069010
+      }
+    ],
+    "2. Create the Supabase project and wire typed configuration": [
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791541075078
+      },
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791541666265
+      }
+    ],
+    "3. Define the database schema as portable SQL migrations (tables only, no RLS yet)": [
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791541672760
+      },
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791541992265
+      }
+    ],
+    "4. Add JWKS-based JWT verification middleware and a protected `/me`": [
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791541998924
+      },
+      {
+        "executionId": "240bad11-1b26-4d85-b974-0d8735b18665",
+        "chatSessionId": "sess_3d6ebec7-50f2-406a-ac51-3b3cc64f7d9a",
+        "timestamp": 1791543206857
+      }
+    ]
+  }
+}
