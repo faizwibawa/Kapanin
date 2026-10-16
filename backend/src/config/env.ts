@@ -121,7 +121,7 @@ function parseCorsOrigins(env: NodeJS.ProcessEnv): readonly string[] {
  * without its value (Requirement 1.2).
  *
  * The JWKS URL is derived from `SUPABASE_URL` as
- * `<supabaseUrl>/.well-known/jwks.json`. An explicit `SUPABASE_JWKS_URL` may be
+ * `<supabaseUrl>/auth/v1/.well-known/jwks.json`. An explicit `SUPABASE_JWKS_URL` may be
  * supplied to override the derivation (useful for local/CLI stacks); when set
  * it must also be a valid https URL.
  */
@@ -140,7 +140,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
     // new URL() normalises `supabaseUrl`; strip any trailing slash from the
     // origin+path before appending the well-known suffix.
     const base = supabaseUrl.toString().replace(/\/+$/, '');
-    supabaseJwksUrl = `${base}/.well-known/jwks.json`;
+    supabaseJwksUrl = `${base}/auth/v1/.well-known/jwks.json`;
   }
 
   // Optional anon/publishable key: present-but-blank is treated as absent. No

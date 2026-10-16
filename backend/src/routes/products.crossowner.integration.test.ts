@@ -48,7 +48,7 @@ function liveConfig(env: LiveEnv): AppConfig {
     port: 3000,
     supabaseUrl: base,
     supabaseSecretKey: env.supabaseSecretKey,
-    supabaseJwksUrl: `${base}/.well-known/jwks.json`,
+    supabaseJwksUrl: `${base}/auth/v1/.well-known/jwks.json`,
     supabaseAnonKey: env.supabaseAnonKey,
     nodeEnv: 'test',
     corsOrigins: Object.freeze([]),
@@ -181,7 +181,7 @@ describe('cross-owner isolation: B cannot see A\'s product (sub-task 8.2)', () =
       expect((listA.body as Array<{ id: string }>).map((p) => p.id)).toContain(productId);
     } finally {
       if (admin !== null && productId !== null) {
-        await admin.from('products').delete().eq('id', productId).catch(() => {});
+        await admin.from('products').delete().eq('id', productId);
       }
       if (admin !== null) {
         await admin.auth.admin.deleteUser(userA.id).catch(() => {});

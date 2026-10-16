@@ -100,7 +100,7 @@ that names the offending variable but never prints its value.
 | --- | --- | --- | --- |
 | `SUPABASE_URL` | yes | — | Project URL; must be a valid `https` URL. |
 | `SUPABASE_SECRET_KEY` | yes | — | Server-only `service_role` key. Never logged or returned. |
-| `SUPABASE_JWKS_URL` | no | derived | Defaults to `<SUPABASE_URL>/.well-known/jwks.json`; override for a local/CLI stack. Must be `https`. |
+| `SUPABASE_JWKS_URL` | no | derived | Defaults to `<SUPABASE_URL>/auth/v1/.well-known/jwks.json`; override for a local/CLI stack. Must be `https`. |
 | `SUPABASE_ANON_KEY` | no | — | Anon/publishable key; used only by live integration tests. `SUPABASE_PUBLISHABLE_KEY` is accepted as an alias. |
 | `PORT` | no | `3000` | Integer 1–65535. |
 | `NODE_ENV` | no | `development` | One of `development` \| `test` \| `production`. |

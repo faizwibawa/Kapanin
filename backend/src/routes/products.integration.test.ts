@@ -66,7 +66,7 @@ function liveConfig(env: LiveEnv): AppConfig {
     port: 3000,
     supabaseUrl: base,
     supabaseSecretKey: env.supabaseSecretKey,
-    supabaseJwksUrl: `${base}/.well-known/jwks.json`,
+    supabaseJwksUrl: `${base}/auth/v1/.well-known/jwks.json`,
     supabaseAnonKey: env.supabaseAnonKey,
     nodeEnv: 'test',
     corsOrigins: Object.freeze([]),
@@ -198,7 +198,7 @@ describe('integration anchor: signup -> JWT -> POST /products -> GET /products (
     } finally {
       // Delete the created product (if any) then the user (cascades anyway).
       if (admin !== null && createdProductId !== null) {
-        await admin.from('products').delete().eq('id', createdProductId).catch(() => {});
+        await admin.from('products').delete().eq('id', createdProductId);
       }
       if (admin !== null) {
         await admin.auth.admin.deleteUser(user.id).catch(() => {});

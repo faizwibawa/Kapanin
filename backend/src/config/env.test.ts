@@ -29,7 +29,7 @@ describe('loadConfig — valid environment', () => {
 
     expect(config.supabaseUrl).toBe(SUPABASE_URL);
     expect(config.supabaseSecretKey).toBe(SECRET_VALUE);
-    expect(config.supabaseJwksUrl).toBe(`${SUPABASE_URL}/.well-known/jwks.json`);
+    expect(config.supabaseJwksUrl).toBe(`${SUPABASE_URL}/auth/v1/.well-known/jwks.json`);
     expect(config.port).toBe(4000);
     expect(config.nodeEnv).toBe('test');
     expect(config.corsOrigins).toEqual([
@@ -45,7 +45,7 @@ describe('loadConfig — valid environment', () => {
     const env = validEnv();
     env.SUPABASE_URL = `${SUPABASE_URL}/`;
     const config = loadConfig(env);
-    expect(config.supabaseJwksUrl).toBe(`${SUPABASE_URL}/.well-known/jwks.json`);
+    expect(config.supabaseJwksUrl).toBe(`${SUPABASE_URL}/auth/v1/.well-known/jwks.json`);
   });
 
   it('honours an explicit SUPABASE_JWKS_URL override', () => {
