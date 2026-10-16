@@ -12,6 +12,9 @@
  * the owner is stamped from the verified JWT, never trusted from the body.
  */
 import { z } from 'zod';
+import { PageQueryFields } from './pagination.js';
+
+export const ProductListQuerySchema = z.object(PageQueryFields).strict();
 
 /**
  * Create payload. `name` is required and non-empty; `cost`/`price` are required

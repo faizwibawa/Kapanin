@@ -22,13 +22,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError, NotFoundError } from '../middleware/error.js';
 import { isNoRows, mapDbError } from './dbError.js';
 import type { StockRow, NewStock, StockPatch } from '../types/stock.js';
+import type { PageFilter } from '../validation/pagination.js';
 
 const TABLE = 'stock';
 const COLUMNS = 'id, owner_id, product_id, quantity, stock_since, updated_at';
 
 /** The owner-scoped CRUD contract for stock (mirrors ProductService). */
 export interface StockService {
-  list(ownerId: string, filter?: { productId?: string }): Promise<StockRow[]>;
+  list(ownerId: string, filter?: { productId?: string } & PageFilter): Promise<StockRow[]>;
   getById(ownerId: string, id: string): Promise<StockRow | null>;
   create(ownerId: string, input: NewStock): Promise<StockRow>;
   update(ownerId: string, id: string, patch: StockPatch): Promise<StockRow>;
@@ -38,12 +39,17 @@ export interface StockService {
 /** Construct a {@link StockService} bound to an injected Supabase client. */
 export function createStockService(client: SupabaseClient): StockService {
   return {
-    async list(ownerId: string, filter?: { productId?: string }): Promise<StockRow[]> {
+    async list(ownerId: string, filter?: { productId?: string } & PageFilter): Promise<StockRow[]> {
       let query = client.from(TABLE).select(COLUMNS).eq('owner_id', ownerId);
       if (filter?.productId !== undefined) {
         query = query.eq('product_id', filter.productId);
       }
-      const { data, error } = await query.order('updated_at', { ascending: true });
+      query = query.order('updated_at', { ascending: true }).order('id', { ascending: true });
+      if (filter?.limit !== undefined || filter?.offset !== undefined) {
+        const offset = filter.offset ?? 0;
+        query = query.range(offset, offset + (filter.limit ?? 1000) - 1);
+      }
+      const { data, error } = await query;
 
       if (error) throw mapDbError(error, 'List stock');
       return (data ?? []) as unknown as StockRow[];

@@ -18,12 +18,13 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { AppError, NotFoundError } from '../middleware/error.js';
 import { mapDbError } from './dbError.js';
 import type { SaleRow, NewSale } from '../types/sale.js';
+import type { PageFilter } from '../validation/pagination.js';
 
 const TABLE = 'sales';
 const COLUMNS = 'id, owner_id, product_id, quantity, price_sold, sold_on, created_at';
 
 /** Filter for listing sales (owner-scoped); supports product + date range. */
-export interface SaleListFilter {
+export interface SaleListFilter extends PageFilter {
   productId?: string;
   from?: string;
   to?: string;
@@ -51,7 +52,12 @@ export function createSaleService(client: SupabaseClient): SaleService {
       if (filter?.to !== undefined) {
         query = query.lte('sold_on', filter.to);
       }
-      const { data, error } = await query.order('sold_on', { ascending: true });
+      query = query.order('sold_on', { ascending: true }).order('id', { ascending: true });
+      if (filter?.limit !== undefined || filter?.offset !== undefined) {
+        const offset = filter.offset ?? 0;
+        query = query.range(offset, offset + (filter.limit ?? 1000) - 1);
+      }
+      const { data, error } = await query;
 
       if (error) throw mapDbError(error, 'List sales');
       return (data ?? []) as unknown as SaleRow[];

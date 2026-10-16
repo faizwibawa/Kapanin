@@ -4,6 +4,7 @@ import {
   NewProductSchema,
   ProductPatchSchema,
   ProductIdParamSchema,
+  ProductListQuerySchema,
 } from '../validation/product.js';
 import {
   AuthError,
@@ -44,7 +45,9 @@ export function createProductsRouter(
   router.get('/products', requireAuth, async (req, res, next) => {
     try {
       const ownerId = ownerIdOf(req.user);
-      const products = await service.list(ownerId);
+      const query = ProductListQuerySchema.safeParse(req.query);
+      if (!query.success) throw new ValidationError('Invalid query', zodFieldDetails(query.error));
+      const products = await service.list(ownerId, query.data);
       res.status(200).json(products);
     } catch (err) {
       next(err);

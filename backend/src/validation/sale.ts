@@ -11,6 +11,7 @@
  * the body (`.strict()` rejects it if smuggled).
  */
 import { z } from 'zod';
+import { PageQueryFields } from './pagination.js';
 
 /** A calendar date in ISO `YYYY-MM-DD` form (matches the Postgres `date` type). */
 const isoDate = z
@@ -41,6 +42,7 @@ export const SaleIdParamSchema = z.object({
 export const SaleListQuerySchema = z
   .object({
     productId: z.string().uuid('productId must be a valid uuid').optional(),
+    ...PageQueryFields,
     from: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, 'from must be a date in YYYY-MM-DD form')

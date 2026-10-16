@@ -36,6 +36,10 @@ export interface AppConfig {
   readonly supabaseAnonKey?: string;
   readonly nodeEnv: NodeEnv;
   readonly corsOrigins: readonly string[];
+  /** Enables the shared, publicly writable demo API when configured. */
+  readonly demoOwnerId?: string;
+  /** Historical CSV stock snapshot used by demo analytics. */
+  readonly demoAsOfDate?: string;
 }
 
 /**
@@ -112,6 +116,22 @@ function parseCorsOrigins(env: NodeJS.ProcessEnv): readonly string[] {
     .filter((origin) => origin.length > 0);
 }
 
+function parseDemoConfig(env: NodeJS.ProcessEnv): Pick<AppConfig, 'demoOwnerId' | 'demoAsOfDate'> {
+  const owner = env.DEMO_OWNER_ID?.trim();
+  const date = env.DEMO_AS_OF_DATE?.trim();
+  if (owner === undefined || owner === '') {
+    if (date) throw new ConfigError('DEMO_AS_OF_DATE requires DEMO_OWNER_ID');
+    return {};
+  }
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(owner)) {
+    throw new ConfigError('DEMO_OWNER_ID must be a UUID');
+  }
+  if (date && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T00:00:00Z`)))) {
+    throw new ConfigError('DEMO_AS_OF_DATE must be a valid YYYY-MM-DD date');
+  }
+  return { demoOwnerId: owner, demoAsOfDate: date || undefined };
+}
+
 /**
  * Build a frozen {@link AppConfig} from an environment map.
  *
@@ -157,6 +177,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
     supabaseAnonKey,
     nodeEnv: parseNodeEnv(env),
     corsOrigins: Object.freeze([...parseCorsOrigins(env)]),
+    ...parseDemoConfig(env),
   };
 
   return Object.freeze(config);

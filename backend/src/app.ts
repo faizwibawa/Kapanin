@@ -129,6 +129,10 @@ export function createApp(config?: AppConfig, overrides?: AppOverrides): Express
   const keySet = overrides?.authKeySet;
   const jwksUrl = config?.supabaseJwksUrl;
 
+  const supabase =
+    overrides?.supabaseClient ??
+    (config !== undefined ? createSupabaseClient(config) : undefined);
+
   if (keySet !== undefined || jwksUrl !== undefined) {
     const requireAuth = createAuthMiddleware({
       // When a key set is injected, jwksUrl is unused by the middleware; fall
@@ -142,10 +146,6 @@ export function createApp(config?: AppConfig, overrides?: AppOverrides): Express
     // (tests); otherwise build the real client from config. The products
     // router is only mounted when a client is available, so a config-less
     // scaffold still boots with just /health and /me.
-    const supabase =
-      overrides?.supabaseClient ??
-      (config !== undefined ? createSupabaseClient(config) : undefined);
-
     if (supabase !== undefined) {
       // Products is the template slice; stock/sales/discounts follow it (Task 7),
       // all mounted behind the same auth middleware and the same Supabase client.
@@ -155,6 +155,23 @@ export function createApp(config?: AppConfig, overrides?: AppOverrides): Express
       app.use(createDiscountsRouter(requireAuth, createDiscountService(supabase)));
       app.use(createAnalyticsRouter(requireAuth, createAnalyticsService(supabase)));
     }
+  }
+
+  if (supabase !== undefined && config?.demoOwnerId !== undefined) {
+    const demoOwnerId = config.demoOwnerId;
+    const demoOwner: RequestHandler = (req, _res, next) => {
+      req.user = { id: demoOwnerId };
+      next();
+    };
+    app.use('/demo', createProductsRouter(demoOwner, createProductService(supabase)));
+    app.use('/demo', createStockRouter(demoOwner, createStockService(supabase)));
+    app.use('/demo', createSalesRouter(demoOwner, createSaleService(supabase)));
+    app.use('/demo', createDiscountsRouter(demoOwner, createDiscountService(supabase)));
+    app.use('/demo', createAnalyticsRouter(
+      demoOwner,
+      createAnalyticsService(supabase, config.demoAsOfDate === undefined
+        ? undefined : () => config.demoAsOfDate!),
+    ));
   }
 
   // Centralized error handler — MUST be last (Requirement 8.3, 8.4).

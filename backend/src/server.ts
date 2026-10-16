@@ -1,5 +1,22 @@
 import { createApp } from './app.js';
 import { loadConfig } from './config/env.js';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+function localEnv(): NodeJS.ProcessEnv {
+  const backendDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  const values: NodeJS.ProcessEnv = {};
+  for (const path of [resolve(backendDir, '../.env'), resolve(backendDir, '.env')]) {
+    let source: string;
+    try { source = readFileSync(path, 'utf8'); } catch { continue; }
+    for (const line of source.split(/\r?\n/)) {
+      const match = /^\s*([A-Z_]+)=(.*)$/.exec(line);
+      if (match) values[match[1]] = match[2].trim().replace(/^['"]|['"]$/g, '');
+    }
+  }
+  return values;
+}
 
 /**
  * Server entrypoint. Owns everything the importable app must not: reading and
@@ -11,7 +28,7 @@ import { loadConfig } from './config/env.js';
  * offending variable; we let that propagate and exit non-zero.
  */
 function start(): void {
-  const config = loadConfig(process.env);
+  const config = loadConfig({ ...localEnv(), ...process.env });
   const app = createApp(config);
 
   app.listen(config.port, () => {

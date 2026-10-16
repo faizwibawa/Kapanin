@@ -44,6 +44,8 @@ export function createSalesRouter(
         productId: query.data.productId,
         from: query.data.from,
         to: query.data.to,
+        limit: query.data.limit,
+        offset: query.data.offset,
       });
       res.status(200).json(rows);
     } catch (err) {

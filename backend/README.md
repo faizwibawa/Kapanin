@@ -105,6 +105,11 @@ that names the offending variable but never prints its value.
 | `PORT` | no | `3000` | Integer 1–65535. |
 | `NODE_ENV` | no | `development` | One of `development` \| `test` \| `production`. |
 | `CORS_ORIGINS` | no | *(none)* | Comma-separated allow-list of browser origins. Empty = no cross-origin access. |
+| `DEMO_OWNER_ID` | no | — | Enables public, shared, writable `/demo/*` routes for this internal `auth.users` owner. |
+| `DEMO_AS_OF_DATE` | no | current date | Fixed date for demo stock-priority analytics; synthetic CSV snapshot is `2026-10-01`. |
+
+The server reads the repository root `.env` or `backend/.env` on startup; actual
+environment variables take precedence. Keep the secret key on the server.
 
 ## Running the database migrations
 
@@ -150,7 +155,7 @@ tokens but never mints them:
 
 ## Available endpoints
 
-`/health` is public; everything else requires a valid Bearer JWT and is scoped
+`/health` is public; the original data routes require a valid Bearer JWT and are scoped
 to the authenticated owner. A request for an id that is absent or owned by
 someone else returns `404`. Request bodies/params/queries are validated with
 `zod` before any service runs; a validation failure returns `400` with
@@ -172,6 +177,41 @@ field-level detail.
 | `GET /discounts` | owner | List discounts; `?productId=<uuid>` filters to one product. |
 | `GET /discounts/:id` · `POST /discounts` · `DELETE /discounts/:id` | owner | Discounts are append-only (no `PATCH`). |
 | `GET /analytics/stock-priorities` | owner | Read-only stock triage; `limit` 1–100 and `offset` ≥ 0. See [analytics MVP](../docs/analytics-mvp.md). |
+
+### Shared demo without login
+
+When `DEMO_OWNER_ID` is set, `/demo/products`, `/demo/stock`, `/demo/sales`,
+`/demo/discounts`, and `/demo/analytics/stock-priorities` expose the same
+methods and request bodies as their original routes. No Bearer token is needed.
+All visitors share the same internal owner and can create, update, or delete
+its records. The original routes remain JWT protected. The service key stays
+only in the backend; the browser must call the backend rather than Supabase
+directly. Configure `CORS_ORIGINS` with the website origin when hosting them on
+different domains. Public write access also means any visitor can alter or
+remove the shared demo data.
+
+Import the bundled synthetic store from the repository root project:
+
+```bash
+cd backend
+node scripts/import-demo.mjs
+node scripts/import-demo.mjs --apply
+```
+
+The first command validates the CSV without writing. The second reuses or
+creates one internal Supabase Auth owner, imports all 6,843 products, stock
+rows, and 209,929 sales in resumable batches, then records its UUID and
+`DEMO_AS_OF_DATE=2026-10-01` in the git-ignored root `.env`. Re-running skips
+rows already imported, so visitor edits to those rows are preserved. The
+historical stock snapshot is dated 2026-10-01. The imported sales retain
+`regular_price_at_sale` and `unit_cost_at_sale`; the CSV has no reliable
+discount windows or daily stock observations, so those tables remain empty.
+Demo analytics uses the fixed snapshot date; sales recorded after that date
+will not appear in its 28-day priority window.
+For large catalogues, `GET /products`, `/stock`, and `/sales` (including their
+`/demo` equivalents) accept `limit=1..1000&offset=0..` so clients can reach
+beyond Supabase's default 1,000-row response cap. Omit them to preserve the
+original list response shape.
 
 Creating a `stock`/`sales`/`discounts` row that references a `product_id` not
 owned by the caller is rejected (composite FK + RLS), writing nothing.

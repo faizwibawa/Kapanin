@@ -19,12 +19,13 @@
 import type { SupabaseClient, PostgrestError } from '@supabase/supabase-js';
 import { AppError, NotFoundError } from '../middleware/error.js';
 import type { Product, NewProduct, ProductPatch } from '../types/product.js';
+import type { PageFilter } from '../validation/pagination.js';
 
 const TABLE = 'products';
 
 /** The owner-scoped CRUD contract (design "Representative interface"). */
 export interface ProductService {
-  list(ownerId: string): Promise<Product[]>;
+  list(ownerId: string, page?: PageFilter): Promise<Product[]>;
   getById(ownerId: string, id: string): Promise<Product | null>;
   create(ownerId: string, input: NewProduct): Promise<Product>;
   update(ownerId: string, id: string, patch: ProductPatch): Promise<Product>;
@@ -74,12 +75,18 @@ const COLUMNS = 'id, owner_id, name, category, cost, price, margin, created_at, 
  */
 export function createProductService(client: SupabaseClient): ProductService {
   return {
-    async list(ownerId: string): Promise<Product[]> {
-      const { data, error } = await client
+    async list(ownerId: string, page?: PageFilter): Promise<Product[]> {
+      let query = client
         .from(TABLE)
         .select(COLUMNS)
         .eq('owner_id', ownerId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true });
+      if (page?.limit !== undefined || page?.offset !== undefined) {
+        const offset = page.offset ?? 0;
+        query = query.range(offset, offset + (page.limit ?? 1000) - 1);
+      }
+      const { data, error } = await query;
 
       if (error) throw mapDbError(error, 'List products');
       return (data ?? []) as unknown as Product[];

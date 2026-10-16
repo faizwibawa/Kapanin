@@ -45,7 +45,7 @@ export function createStockRouter(
       if (!query.success) {
         throw new ValidationError('Invalid query', zodFieldDetails(query.error));
       }
-      const rows = await service.list(ownerId, { productId: query.data.productId });
+      const rows = await service.list(ownerId, query.data);
       res.status(200).json(rows);
     } catch (err) {
       next(err);
