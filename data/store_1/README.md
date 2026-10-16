@@ -74,3 +74,22 @@ There is **no daily stock history**. `stock_on_hand` describes only
 it were stock on those dates. Missing transaction rows also cannot prove zero
 demand because historical availability is unknown. Do not use this synthetic
 dataset as evidence that a discount policy works in a real store.
+
+## Mapping to the current Kapanin backend
+
+The notebook projects these CSVs into the current Supabase table shapes in
+memory. It does not create another copy of the synthetic dataset.
+
+| Backend field | CSV source | Note |
+| --- | --- | --- |
+| `products.id/name/category/cost/price` | `products.product_id/product_name/category/unit_cost/list_price` | CSV IDs are demo strings, not backend UUIDs. |
+| `stock.product_id/quantity/stock_since` | `products.product_id/stock_on_hand/stock_received_date` | The CSV has one stock snapshot per product. `stock_since` is simulated. |
+| `sales.product_id/quantity/price_sold/sold_on` | `transactions.product_id/quantity/unit_sale_price/transaction_date` | Sale price is per unit. |
+
+The snapshot date comes from `stock_as_of_date` in this benchmark. A live
+backend request should use an explicit as-of date for its current stock read.
+The current backend has no `expiry_date`, historical stock snapshots, or
+transaction-level regular price. Discount windows cannot be reliably
+reconstructed from individual discounted sale rows. Thus the notebook's
+expiry and discount charts are benchmark-only exploration; the backend-ready
+priority calculation uses only products, current stock, and sales.
