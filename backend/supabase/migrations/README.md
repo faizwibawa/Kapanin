@@ -18,13 +18,17 @@ Files are applied in ascending numeric order. The prefix encodes the order:
 | `0006_updated_at_triggers.sql` | `set_updated_at()` function + triggers on `profiles`, `products`, `stock` |
 | `0007_rls_and_profile_trigger.sql` | enables RLS on `profiles`/`products`/`stock`/`sales`/`discounts`; owner-scoped policies (`owner_id = auth.uid()`, profiles on `id = auth.uid()`); `handle_new_user()` + `on_auth_user_created` trigger; `kapanin_rls_report()` test helper |
 | `0008_analytics_history.sql` | daily product and batch observations, sale price/promotion attribution fields, and the RLS-aware `product_day` view |
+| `0009_remove_unused_history.sql` | removes the unused daily/batch observation tables and `product_day` view; retains sale attribution and discounts |
 
 Order matters: `0002` must run before `0003`–`0005` because those tables carry a
 composite foreign key against `products(id, owner_id)`, `0006` must run after the
 tables it attaches triggers to, and `0007` must run last because it enables RLS
 and attaches policies/triggers to tables created by `0001`–`0005`.
-Apply `0008` after `0007`; it is a forward migration and is not intended to be
-run twice in the SQL Editor. `_combined_apply_all.sql` includes it for new databases.
+Apply `0008` after `0007`, then `0009`. For an existing project with `0008`
+already applied, paste only `0009_remove_unused_history.sql` into the SQL Editor.
+It refuses to delete nonempty history tables. `_combined_apply_all.sql` includes
+both for new databases; the final schema has no daily/batch history tables or
+`product_day` view.
 
 The migrations are written to be re-runnable where reasonable: tables use
 `create table if not exists`, functions use `create or replace`, triggers are

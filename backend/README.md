@@ -119,9 +119,9 @@ carry composite foreign keys against `products`, and the analytics-history
 migration follows the original RLS setup. See `supabase/migrations/README.md` for the per-file breakdown.
 
 **Now (no CLI required):** open the Supabase project's **SQL Editor** and run
-each file's contents in order (`0001` → `0008`). For convenience,
+each file's contents in order (`0001` → `0009`). For convenience,
 `supabase/migrations/_combined_apply_all.sql` concatenates every migration in
-the correct order — paste that single file into the SQL Editor to apply the
+the correct order through `0009` — paste that single file into the SQL Editor to apply the
 whole schema in one go.
 
 **Later (Supabase CLI):** once the CLI is adopted, the same files apply with
@@ -129,9 +129,8 @@ whole schema in one go.
 (local stack). No file changes are needed to switch — that is the point of
 keeping the schema as plain, ordered SQL.
 
-The migrations create `profiles`, `products`, `stock`, `sales`, `discounts`,
-daily observations and batch history, plus the `product_day` view;
-add the check constraints (`quantity >= 0`, `percentage` in `(0, 100]`,
+The final schema has `profiles`, `products`, `stock`, `sales`, and `discounts`.
+The migrations add check constraints (`quantity >= 0`, `percentage` in `(0, 100]`,
 `price >= 0`, `cost >= 0`, `end_date >= start_date`) and composite
 same-owner foreign keys; maintain `created_at`/`updated_at`; enable RLS with
 owner-scoped policies on every table; and install the `handle_new_user` trigger
@@ -205,7 +204,7 @@ rows, and 209,929 sales in resumable batches, then records its UUID and
 rows already imported, so visitor edits to those rows are preserved. The
 historical stock snapshot is dated 2026-10-01. The imported sales retain
 `regular_price_at_sale` and `unit_cost_at_sale`; the CSV has no reliable
-discount windows or daily stock observations, so those tables remain empty.
+discount windows. The unused daily/batch history tables were removed by `0009`.
 Demo analytics uses the fixed snapshot date; sales recorded after that date
 will not appear in its 28-day priority window.
 For large catalogues, `GET /products`, `/stock`, and `/sales` (including their

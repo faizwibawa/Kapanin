@@ -1,10 +1,11 @@
 ﻿-- ============================================================
 -- Kapanin — COMBINED schema migration (apply once)
 -- Paste this whole file into the Supabase SQL Editor and Run.
--- It concatenates 0001..0007 in dependency order:
+-- It concatenates 0001..0009 in dependency order:
 --   0001 profiles -> 0002 products -> 0003 stock
 --   -> 0004 sales -> 0005 discounts -> 0006 updated_at triggers
 --   -> 0007 RLS policies + profile auto-creation trigger
+--   -> 0008 sale attribution/history -> 0009 remove unused history
 -- Idempotent: safe to re-run (create table if not exists / create or replace /
 -- drop policy if exists / drop trigger if exists).
 -- NOTE: this is a convenience bundle; the numbered files remain the source of truth.
@@ -415,3 +416,36 @@ left join sales_daily s on s.owner_id = d.owner_id
   and s.product_id = d.product_id and s.sold_on = d.observed_on;
 
 grant select on public.product_day to authenticated;
+
+-- ------------------------------------------------------------
+-- 0009_remove_unused_history.sql
+-- ------------------------------------------------------------
+-- Remove the unused product-day training panel. Discounts and sale price/cost
+-- attribution remain in use. Fail safely if any history has been recorded.
+begin;
+
+do $$
+declare
+  table_name text;
+  has_data boolean;
+begin
+  foreach table_name in array array[
+    'stock_batch_daily_observations',
+    'product_daily_observations',
+    'stock_batches'
+  ] loop
+    if to_regclass(format('public.%I', table_name)) is not null then
+      execute format('select exists (select 1 from public.%I)', table_name) into has_data;
+      if has_data then
+        raise exception 'Cannot drop nonempty table public.%', table_name;
+      end if;
+    end if;
+  end loop;
+end $$;
+
+drop view if exists public.product_day;
+drop table if exists public.stock_batch_daily_observations;
+drop table if exists public.product_daily_observations;
+drop table if exists public.stock_batches;
+
+commit;
