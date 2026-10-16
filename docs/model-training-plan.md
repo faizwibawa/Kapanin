@@ -6,6 +6,8 @@
 
 Data prototipe adalah sintetis. Tidak ada riwayat stok harian atau tanggal kedaluwarsa per batch. Karena itu penjualan tercatat belum bisa dianggap sebagai permintaan sesungguhnya saat stok kosong, dan belum ada label kerugian kedaluwarsa yang teramati.
 
+Implementasi berikutnya sudah disiapkan di repo: endpoint baca `GET /analytics/stock-priorities` dan migrasi `0008_analytics_history.sql` untuk observasi harian, batch, serta view `product_day` (lihat [kontrak analytics MVP](analytics-mvp.md)). Migrasi belum otomatis terpasang di Supabase dan data historis yang belum pernah dicatat tetap tidak diketahui. Training model produk-harian masih menunggu pengumpulan dan audit data ini.
+
 ## Urutan model
 
 | Tahap | Target yang terukur | Pembanding minimum | Syarat data | Keputusan bila gagal |

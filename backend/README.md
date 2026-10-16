@@ -3,12 +3,13 @@
 A stateless **Node.js + Express + TypeScript** API over **Supabase** (managed
 Postgres + Supabase Auth). This is the *foundation phase* of Kapanin, an
 AI-based decision-support system that will recommend when and how much small
-retail store owners (UMKM) should discount products. This phase delivers only
-authenticated, owner-scoped CRUD over the core retail data — products, stock,
-sales, and discounts — that later phases build on.
+retail store owners (UMKM) should discount products. The backend delivers
+authenticated, owner-scoped CRUD over products, stock, sales, and discounts,
+plus a read-only informational stock-priority endpoint.
 
 > **Deferred to later phases.** The **frontend application** and the **AI /
-> recommendation engine** are explicitly out of scope here. The frontend is
+> recommendation engine** are explicitly out of scope here. The stock-priority
+> endpoint uses transparent rules and does not recommend discount size. The frontend is
 > referenced only where its request contract (a Supabase Bearer JWT) shapes this
 > backend; the AI engine will later *read* sales/stock/discount history, which is
 > why the schema already records it. No UI and no model/inference code is built
@@ -53,7 +54,7 @@ backend/
     server.ts              loads+validates config, then binds the port
     config/                env.ts (loadConfig/AppConfig) + supabase.ts (service_role client)
     middleware/            auth.ts (JWKS JWT verify), error.ts (AppError + errorHandler)
-    routes/                health, me, products, stock, sales, discounts
+    routes/                health, me, products, stock, sales, discounts, analytics
     services/              owner-scoped DB access (the only layer that queries Supabase)
     validation/            zod schemas for request bodies/params/queries
     types/                 shared domain + Express request augmentation types
@@ -109,11 +110,11 @@ that names the offending variable but never prints its value.
 
 The schema is a set of ordered SQL files in `supabase/migrations/`. They apply
 in ascending numeric order (`0001` first); order matters because later tables
-carry composite foreign keys against `products`, and the RLS/trigger migration
-must run last. See `supabase/migrations/README.md` for the per-file breakdown.
+carry composite foreign keys against `products`, and the analytics-history
+migration follows the original RLS setup. See `supabase/migrations/README.md` for the per-file breakdown.
 
 **Now (no CLI required):** open the Supabase project's **SQL Editor** and run
-each file's contents in order (`0001` → `0007`). For convenience,
+each file's contents in order (`0001` → `0008`). For convenience,
 `supabase/migrations/_combined_apply_all.sql` concatenates every migration in
 the correct order — paste that single file into the SQL Editor to apply the
 whole schema in one go.
@@ -123,7 +124,8 @@ whole schema in one go.
 (local stack). No file changes are needed to switch — that is the point of
 keeping the schema as plain, ordered SQL.
 
-The migrations create `profiles`, `products`, `stock`, `sales`, and `discounts`;
+The migrations create `profiles`, `products`, `stock`, `sales`, `discounts`,
+daily observations and batch history, plus the `product_day` view;
 add the check constraints (`quantity >= 0`, `percentage` in `(0, 100]`,
 `price >= 0`, `cost >= 0`, `end_date >= start_date`) and composite
 same-owner foreign keys; maintain `created_at`/`updated_at`; enable RLS with
@@ -169,6 +171,7 @@ field-level detail.
 | `GET /sales/:id` · `POST /sales` · `DELETE /sales/:id` | owner | Sales are append-only (no `PATCH`). |
 | `GET /discounts` | owner | List discounts; `?productId=<uuid>` filters to one product. |
 | `GET /discounts/:id` · `POST /discounts` · `DELETE /discounts/:id` | owner | Discounts are append-only (no `PATCH`). |
+| `GET /analytics/stock-priorities` | owner | Read-only stock triage; `limit` 1–100 and `offset` ≥ 0. See [analytics MVP](../docs/analytics-mvp.md). |
 
 Creating a `stock`/`sales`/`discounts` row that references a `product_id` not
 owned by the caller is rejected (composite FK + RLS), writing nothing.

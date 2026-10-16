@@ -6,12 +6,14 @@ import { createProductsRouter } from './routes/products.js';
 import { createStockRouter } from './routes/stock.js';
 import { createSalesRouter } from './routes/sales.js';
 import { createDiscountsRouter } from './routes/discounts.js';
+import { createAnalyticsRouter } from './routes/analytics.js';
 import { createAuthMiddleware, type KeySet } from './middleware/auth.js';
 import { errorHandler } from './middleware/error.js';
 import { createProductService } from './services/products.js';
 import { createStockService } from './services/stock.js';
 import { createSaleService } from './services/sales.js';
 import { createDiscountService } from './services/discounts.js';
+import { createAnalyticsService } from './services/analytics.js';
 import { createSupabaseClient } from './config/supabase.js';
 import type { AppConfig } from './config/env.js';
 
@@ -151,6 +153,7 @@ export function createApp(config?: AppConfig, overrides?: AppOverrides): Express
       app.use(createStockRouter(requireAuth, createStockService(supabase)));
       app.use(createSalesRouter(requireAuth, createSaleService(supabase)));
       app.use(createDiscountsRouter(requireAuth, createDiscountService(supabase)));
+      app.use(createAnalyticsRouter(requireAuth, createAnalyticsService(supabase)));
     }
   }
 

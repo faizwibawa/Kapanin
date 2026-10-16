@@ -105,6 +105,9 @@ class FakeQueryBuilder implements PromiseLike<PgResult<FakeRow[] | FakeRow | nul
   private patch: Record<string, unknown> | null = null;
   private singleFlag = false;
   private maybeSingleFlag = false;
+  private orderColumn: string | null = null;
+  private ascending = true;
+  private page: [number, number] | null = null;
 
   constructor(
     private readonly db: FakeDb,
@@ -148,8 +151,14 @@ class FakeQueryBuilder implements PromiseLike<PgResult<FakeRow[] | FakeRow | nul
     return this;
   }
 
-  order(_column: string, _opts?: unknown): this {
-    // Rows are returned in insertion order already; ordering is a no-op here.
+  order(column: string, opts?: { ascending?: boolean }): this {
+    this.orderColumn = column;
+    this.ascending = opts?.ascending ?? true;
+    return this;
+  }
+
+  range(from: number, to: number): this {
+    this.page = [from, to];
     return this;
   }
 
@@ -251,7 +260,18 @@ class FakeQueryBuilder implements PromiseLike<PgResult<FakeRow[] | FakeRow | nul
     }
 
     // select
-    const matched = this.rows();
+    let matched = this.rows();
+    if (this.orderColumn !== null) {
+      const column = this.orderColumn;
+      const sign = this.ascending ? 1 : -1;
+      matched = [...matched].sort((a, b) => {
+        const av = a[column];
+        const bv = b[column];
+        if (typeof av === 'number' && typeof bv === 'number') return sign * (av - bv);
+        return sign * String(av ?? '').localeCompare(String(bv ?? ''));
+      });
+    }
+    if (this.page !== null) matched = matched.slice(this.page[0], this.page[1] + 1);
     if (this.singleFlag || this.maybeSingleFlag) {
       if (matched.length === 0) {
         return { data: null, error: null };
