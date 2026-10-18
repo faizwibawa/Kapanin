@@ -2,15 +2,8 @@
 # Kapanin — .gitignore
 # ============================================================
 
-# --- Kiro ---
-# Ignore local Kiro runtime/user state, but KEEP shared specs
-# (.kiro/specs/**) and steering docs in version control so the
-# team shares requirements, design, and tasks.
-.kiro/cache/
-.kiro/logs/
-.kiro/user/
-.kiro/*.local
-.kiro/**/*.local
+# --- Local tooling / IDE workspace state ---
+.kiro/
 
 # --- Environment / secrets ---
 .env
